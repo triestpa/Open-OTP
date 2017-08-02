@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Authenticator</title>
+    <meta name="description" content="Psuedo-random number generator authenticator app.">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="/styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <input id="secret" type="text">
+    <input type="button" value="Set Secret" onclick="setSecret()">
+    <input type="button" value="Randomize" onclick="randomizeSecret()">
+    <h2 id="error"></h2>
+    <h2 id="time"></h2>
+    <h2 id="number"></h2>
+    <div id="qrcode"></div>
+    <a href="./distribution.html" target="_blank" rel="noopener">Test Psuedorandom Number Generator Distribution.</a>
+    <script src="vendor/qrcode.min.js"></script>
+    <script src="vendor/base32.js"></script>
+    <script src="vendor/sjcl.js"></script>
+    <script src="vendor/buffer.js"></script>
+    <script src="otp.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

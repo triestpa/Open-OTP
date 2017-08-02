@@ -1,0 +1,10 @@
+html, body {
+  background: #222;
+  color: white;
+}
+
+#qrcode img {
+  padding: 12px;
+  margin: 0 auto;
+  background: white
+}
