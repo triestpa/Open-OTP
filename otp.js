@@ -1,4 +1,9 @@
+// // Use browser-version of Nodejs buffer
+// const Buffer = require('./vendor/buffer')
+//const base32 = require('./vendor/base32')
+
 const Buffer = buffer.Buffer
+
 
 /**
  * OTP manager class to generate RFC 4226 compliant HMAC-based one-time passwords (HOTPs),
@@ -9,7 +14,11 @@ class OTP {
      * Construct an instance of the OTP generator with a shared secret.
      * @param {string} secret The ascii encoded shared secret used to generate and validate the OTP.
      */
-    constructor (secret) {
+    constructor (secret, encoding='utf8') {
+      if (encoding === 'base32') {
+        secret = base32.decode(secret);
+      }
+
       this.secret = String(secret)
     }
 
@@ -24,17 +33,17 @@ class OTP {
      * the also the only algorithm supported by Google Authenticator.
      * See here for more info - https://github.com/google/google-authenticator-libpam/issues/11
      */
-    getHmacDigest (secret, counter) {
-
+    getHmacDigest(secret, counter) {
       // Initialize SHA-1-HMAC object with encoded secret as key
-      const hmac = new sjcl.misc.hmac(sjcl.codec.arrayBuffer.toBits(secret), sjcl.hash.sha1)
+      let shaObj = new jsSHA("SHA-1", "ARRAYBUFFER")
+      shaObj.setHMACKey(secret, "TEXT")
 
       // Pass the current counter as a message to the HMAC object
-      hmac.update(sjcl.codec.arrayBuffer.toBits(counter));
+      shaObj.update(counter)
 
       // Retreive and return the result of the the hash in an array
-      let digest = sjcl.codec.arrayBuffer.fromBits(hmac.digest(), false);
-      return new Uint8Array(digest)
+      let hmacResult = new Uint8Array(shaObj.getHMAC("ARRAYBUFFER"))
+      return hmacResult
     }
 
     /**
@@ -71,15 +80,10 @@ class OTP {
      * @param {string} counter A distinct counter value used to generate an OTP with the secret.
      * @returns {string} A six-digit OTP value
      */
-    getHOTP(counter) {
-      // Encode the parameters as bit array buffers
-      // const encodedSecret = this.toArrayBuffer(this.secret)
-      // const encodedCounter = this.toArrayBuffer(counter)
-
-      let { encodedSecret, encodedCounter } = this.processInput(this.secret, counter)
-
+    getHOTP (counter) {
       // Calculate an HMAC encoded value from the secret and counter values
-      const hmacDigest = this.getHmacDigest(encodedSecret, encodedCounter)
+      counter = this.encodeCounter(counter)
+      const hmacDigest = this.getHmacDigest(this.secret, counter)
 
       // Extract a dynamically truncated binary code from the HMAC result
       const binaryCode = this.getBinaryCode(hmacDigest)
@@ -95,7 +99,7 @@ class OTP {
      * A TOTP is just an HOTP, using a time interval as the counter.
      * @returns {string} A six-digit OTP value
      */
-    getTOTP() {
+    getTOTP () {
       // Get the current epoch, rounded to intervals of 30 seconds
       let now = Math.floor((new Date()).getTime() / 1000)
       const epoch = Math.floor(now / 30)
@@ -113,7 +117,7 @@ class OTP {
      * Convert Buffer to ArrayBuffer
      * From https://stackoverflow.com/a/12101012
     */
-    toArrayBuffer(buf) {
+    toArrayBuffer (buf) {
       let ab = new ArrayBuffer(buf.length);
       let view = new Uint8Array(ab);
       for (let i = 0; i < buf.length; ++i) {
@@ -122,31 +126,27 @@ class OTP {
       return ab;
     }
 
-    /** Convert the secret and counter values as buffers. */
-    processInput(secret, counter) {
-      // Convert secret to buffer
-      secret = new Buffer(secret, 'ascii');
+    /** Return base-32 encoded secret. */
+    getBase32Secret () {
+      return base32.encode(Buffer(secret)).toString().replace(/=/g, '')
+    }
 
+    /** Encode the counter values as an 8 byte array buffer. */
+    encodeCounter (counter) {
       // Convert the counter value to an 8 byte bufer
-      // From https://github.com/speakeasyjs/speakeasy
-      let buf = new Buffer(8);
+      // Adapted from https://github.com/speakeasyjs/speakeasy
+      let buf = new Uint8Array(8);
       let tmp = counter;
       for (let i = 0; i < 8; i++) {
-        // Mask 0xff over number to get last 8
-        buf[7 - i] = tmp & 0xff;
+          // Mask 0xff over number to get last 8
+          buf[7 - i] = tmp & 0xff;
 
-        // Shift 8 and get ready to loop over the next batch of 8
-        tmp = tmp >> 8;
+          // Shift 8 and get ready to loop over the next batch of 8
+          tmp = tmp >> 8;
       }
 
-      const encodedSecret = this.toArrayBuffer(secret)
-      const encodedCounter = this.toArrayBuffer(buf)
-      return { encodedSecret, encodedCounter }
+      return buf
     }
 }
 
-/** Add this for cross node/browser compatibility */
-if (typeof module !== 'undefined' && module.exports) {
-  const sjcl = require('./sjcl.js')
-  module.exports = OTP
-}
+// module.exports = OTP
