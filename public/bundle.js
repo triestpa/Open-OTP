@@ -1,215 +1,295 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.buffer = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict'
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
 
-exports.byteLength = byteLength
-exports.toByteArray = toByteArray
-exports.fromByteArray = fromByteArray
+const OTP = __webpack_require__(1)
+// const QRCode = require('./vendor/qrcode.min')
 
-var lookup = []
-var revLookup = []
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
+/**
+ * App controller
+ */
 
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i]
-  revLookup[code.charCodeAt(i)] = i
+/** Register service worker if compatable with current browser */
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register('sw.js').catch(console.error);
 }
 
-revLookup['-'.charCodeAt(0)] = 62
-revLookup['_'.charCodeAt(0)] = 63
+var qrcode = new QRCode(document.getElementById("qrcode"), {
+  width: 250,
+  height: 250
+})
 
-function placeHoldersCount (b64) {
-  var len = b64.length
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
+document.addEventListener("DOMContentLoaded", function(){
+  // Use var for these variables, since we want them in the global scope.
+  var secret = OTP.getRandomInt(0, Math.pow(10, 12))
+
+  // Show default generated secret value in UI
+  setSecret(secret)
+
+  let numberElement = document.getElementById('number')
+  let timeElement = document.getElementById('time')
+
+  setInterval(() => {
+      // Update time and value every second
+      let date = new Date();
+      timeElement.textContent = date.toLocaleString();
+      numberElement.textContent = generator.getTOTP()
+  }, 1000)
+})
+
+function randomizeSecret () {
+  secret = OTP.getRandomInt(0, Math.pow(10, 12))
+  setSecret(secret)
+}
+
+function setSecret (newSecret) {
+  generator = new OTP(secret)
+  document.getElementById('secret').value = secret
+  setQRCode(generator)
+}
+
+function setQRCode (generator, label = 'test') {
+  secretb32 =  generator.getBase32Secret()
+  let qrContent = `otpauth://totp/${label}?secret=${secretb32}`
+  console.log(qrContent)
+  qrcode.clear()
+  qrcode.makeCode(qrContent)
+}
+
+function setSecret (newSecret) {
+  let secretInput = document.getElementById('secret')
+  if (!newSecret) {
+    newSecret = secretInput.value
   }
 
-  // the number of equal signs (place holders)
-  // if there are two placeholders, than the two characters before it
-  // represent one byte
-  // if there is only one, then the three characters before it represent 2 bytes
-  // this is just a cheap hack to not do indexOf twice
-  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
-}
+  newSecret = String(newSecret)
 
-function byteLength (b64) {
-  // base64 is 4/3 + up to two characters of the original data
-  return b64.length * 3 / 4 - placeHoldersCount(b64)
-}
-
-function toByteArray (b64) {
-  var i, j, l, tmp, placeHolders, arr
-  var len = b64.length
-  placeHolders = placeHoldersCount(b64)
-
-  arr = new Arr(len * 3 / 4 - placeHolders)
-
-  // if there are placeholders, only get up to the last complete 4 chars
-  l = placeHolders > 0 ? len - 4 : len
-
-  var L = 0
-
-  for (i = 0, j = 0; i < l; i += 4, j += 3) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
-    arr[L++] = (tmp >> 16) & 0xFF
-    arr[L++] = (tmp >> 8) & 0xFF
-    arr[L++] = tmp & 0xFF
+  try {
+    generator = new OTP(newSecret)
+    secret = newSecret
+    setQRCode(generator)
+  } catch (err) {
+    console.error(err.message)
   }
 
-  if (placeHolders === 2) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[L++] = tmp & 0xFF
-  } else if (placeHolders === 1) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[L++] = (tmp >> 8) & 0xFF
-    arr[L++] = tmp & 0xFF
-  }
-
-  return arr
+  secretInput.value = secret
 }
 
-function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
-}
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
 
-function encodeChunk (uint8, start, end) {
-  var tmp
-  var output = []
-  for (var i = start; i < end; i += 3) {
-    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
-    output.push(tripletToBase64(tmp))
-  }
-  return output.join('')
-}
+// Use browser-version of Nodejs buffer
+const Buffer = __webpack_require__(2).Buffer
+const base32 = __webpack_require__(7)
+const jsSHA = __webpack_require__(8)
+//const Buffer = buffer.Buffer
 
-function fromByteArray (uint8) {
-  var tmp
-  var len = uint8.length
-  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-  var output = ''
-  var parts = []
-  var maxChunkLength = 16383 // must be multiple of 3
+/**
+ * OTP manager class to generate RFC 4226 compliant HMAC-based one-time passwords (HOTPs),
+ * and RFC 6238 compliant time-based one-time passwords (TOTPs).
+ */
+class OTP {
+    /**
+     * Construct an instance of the OTP generator with a shared secret.
+     * @param {string} secret The ascii encoded shared secret used to generate and validate the OTP.
+     */
+    constructor (secret, encoding='utf8') {
+      if (encoding === 'base32') {
+        secret = base32.decode(secret);
+      }
 
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
-  }
-
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1]
-    output += lookup[tmp >> 2]
-    output += lookup[(tmp << 4) & 0x3F]
-    output += '=='
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
-    output += lookup[tmp >> 10]
-    output += lookup[(tmp >> 4) & 0x3F]
-    output += lookup[(tmp << 2) & 0x3F]
-    output += '='
-  }
-
-  parts.push(output)
-
-  return parts.join('')
-}
-
-},{}],2:[function(require,module,exports){
-exports.read = function (buffer, offset, isLE, mLen, nBytes) {
-  var e, m
-  var eLen = nBytes * 8 - mLen - 1
-  var eMax = (1 << eLen) - 1
-  var eBias = eMax >> 1
-  var nBits = -7
-  var i = isLE ? (nBytes - 1) : 0
-  var d = isLE ? -1 : 1
-  var s = buffer[offset + i]
-
-  i += d
-
-  e = s & ((1 << (-nBits)) - 1)
-  s >>= (-nBits)
-  nBits += eLen
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-
-  m = e & ((1 << (-nBits)) - 1)
-  e >>= (-nBits)
-  nBits += mLen
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-
-  if (e === 0) {
-    e = 1 - eBias
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity)
-  } else {
-    m = m + Math.pow(2, mLen)
-    e = e - eBias
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
-}
-
-exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c
-  var eLen = nBytes * 8 - mLen - 1
-  var eMax = (1 << eLen) - 1
-  var eBias = eMax >> 1
-  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
-  var i = isLE ? 0 : (nBytes - 1)
-  var d = isLE ? 1 : -1
-  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
-
-  value = Math.abs(value)
-
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0
-    e = eMax
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2)
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--
-      c *= 2
-    }
-    if (e + eBias >= 1) {
-      value += rt / c
-    } else {
-      value += rt * Math.pow(2, 1 - eBias)
-    }
-    if (value * c >= 2) {
-      e++
-      c /= 2
+      this.secret = String(secret)
     }
 
-    if (e + eBias >= eMax) {
-      m = 0
-      e = eMax
-    } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen)
-      e = e + eBias
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
-      e = 0
+    /**
+     * Calculate a time-based one-time password (TOTP), as defined in RFC-6238
+     * A TOTP is just an HOTP, using a time interval as the counter.
+     * @returns {string} A six-digit OTP value
+     */
+    getTOTP () {
+      // Get the current epoch, rounded to intervals of 30 seconds
+      let now = Math.floor((new Date()).getTime() / 1000)
+      const epoch = Math.floor(now / 30)
+
+      // Calcule an HOTP using the epoch as the counter
+      return this.getHOTP(String(epoch))
     }
-  }
 
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+    /**
+     * Calculate a 6-digit HMAC-based one-time password (HOTP), as defined in RFC-4226
+     * @param {string} counter A distinct counter value used to generate an OTP with the secret.
+     * @returns {string} A six-digit OTP value
+     */
+    getHOTP (counter) {
+      // Calculate an HMAC encoded value from the secret and counter values
+      counter = this.encodeCounter(counter)
+      const hmacDigest = this.getHmacDigest(this.secret, counter)
 
-  e = (e << mLen) | m
-  eLen += mLen
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+      // Extract a dynamically truncated binary code from the HMAC result
+      const binaryCode = this.getBinaryCode(hmacDigest)
 
-  buffer[offset + i - d] |= s * 128
+      // Convert the binary code to a number between 0 and 1,000,000
+      const hotp = this.convertToHotp(binaryCode, 6)
+
+      return hotp
+    }
+
+    /**
+     * Generate an HMAC-SHA-1 for the secret and key
+     * @param {ArrayBuffer} secret The randomly generated shared secret.
+     * @param {ArrayBuffer} counter The counter value. In a TOTP this will be derived from the current time.
+     * @returns {Uint8Array} The HMAC hash result.
+     *
+     * Note - SHA-1 is now considered insecure for some uses, but is still considered secure for the purposes
+     * of OTP generation. It is the default hashing algorithm for HOTP (RFC4226) but TOTP (RFC6238), and is
+     * the also the only algorithm supported by Google Authenticator.
+     * See here for more info - https://github.com/google/google-authenticator-libpam/issues/11
+     */
+    getHmacDigest(secret, counter) {
+      // Initialize SHA-1-HMAC object with encoded secret as key
+      let shaObj = new jsSHA("SHA-1", "ARRAYBUFFER")
+      shaObj.setHMACKey(secret, "TEXT")
+
+      // Pass the current counter as a message to the HMAC object
+      shaObj.update(counter)
+
+      // Retreive and return the result of the the hash in an array
+      let hmacResult = new Uint8Array(shaObj.getHMAC("ARRAYBUFFER"))
+      return hmacResult
+    }
+
+    /**
+     * Extract the dynamic binary code from an HMAC-SHA-1 result.
+     * @param {Uint8Array} digest The digest should be a 20-byte Uint8Array
+     * @returns {number} A 31-bit binary code integer
+     */
+    getBinaryCode (digest) {
+      const offset  = digest[digest.length - 1] & 0xf
+      let binaryCode = (
+        ((digest[offset] & 0x7f) << 24) |
+        ((digest[offset + 1] & 0xff) << 16) |
+        ((digest[offset + 2] & 0xff) << 8) |
+        (digest[offset + 3] & 0xff))
+
+      return binaryCode
+    }
+
+    /**
+     * Convert a binary code to a 6 digit OTP value
+     * @param {number} number A 31-bit binary code
+     * @returns {number} An n-digit string of numbers
+     */
+    convertToHotp (number, digits = 6) {
+      // Convert binary code to an up-to 6 digit number
+      let otp = number % Math.pow(10, digits)
+
+      // If the resulting number has fewer than n digits, pad the front with zeros
+      return String(otp).padStart(digits, '0')
+    }
+
+
+    /** Static helper to generate random numbers */
+    static getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min) + min)
+    }
+
+    /** Return base-32 encoded secret. */
+    getBase32Secret () {
+      return base32.encode(Buffer(secret)).toString().replace(/=/g, '')
+    }
+
+    /** Encode the counter values as an 8 byte array buffer. */
+    encodeCounter (counter) {
+      // Convert the counter value to an 8 byte bufer
+      // Adapted from https://github.com/speakeasyjs/speakeasy
+      let buf = new Uint8Array(8);
+      let tmp = counter;
+      for (let i = 0; i < 8; i++) {
+          // Mask 0xff over number to get last 8
+          buf[7 - i] = tmp & 0xff;
+
+          // Shift 8 and get ready to loop over the next batch of 8
+          tmp = tmp >> 8;
+      }
+
+      return buf
+    }
 }
 
-},{}],3:[function(require,module,exports){
-var toString = {}.toString;
+module.exports = OTP
 
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
 
-},{}],"buffer":[function(require,module,exports){
-(function (global){
-/*!
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/*!
  * The buffer module from node.js, for the browser.
  *
  * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
@@ -217,11 +297,11 @@ module.exports = Array.isArray || function (arr) {
  */
 /* eslint-disable no-proto */
 
-'use strict'
 
-var base64 = require('base64-js')
-var ieee754 = require('ieee754')
-var isArray = require('isarray')
+
+var base64 = __webpack_require__(4)
+var ieee754 = __webpack_require__(5)
+var isArray = __webpack_require__(6)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -1999,6 +2079,608 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":1,"ieee754":2,"isarray":3}]},{},[])("buffer")
-});
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+exports.byteLength = byteLength
+exports.toByteArray = toByteArray
+exports.fromByteArray = fromByteArray
+
+var lookup = []
+var revLookup = []
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
+
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i]
+  revLookup[code.charCodeAt(i)] = i
+}
+
+revLookup['-'.charCodeAt(0)] = 62
+revLookup['_'.charCodeAt(0)] = 63
+
+function placeHoldersCount (b64) {
+  var len = b64.length
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
+  }
+
+  // the number of equal signs (place holders)
+  // if there are two placeholders, than the two characters before it
+  // represent one byte
+  // if there is only one, then the three characters before it represent 2 bytes
+  // this is just a cheap hack to not do indexOf twice
+  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
+}
+
+function byteLength (b64) {
+  // base64 is 4/3 + up to two characters of the original data
+  return (b64.length * 3 / 4) - placeHoldersCount(b64)
+}
+
+function toByteArray (b64) {
+  var i, l, tmp, placeHolders, arr
+  var len = b64.length
+  placeHolders = placeHoldersCount(b64)
+
+  arr = new Arr((len * 3 / 4) - placeHolders)
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  l = placeHolders > 0 ? len - 4 : len
+
+  var L = 0
+
+  for (i = 0; i < l; i += 4) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
+    arr[L++] = (tmp >> 16) & 0xFF
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
+  }
+
+  if (placeHolders === 2) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
+    arr[L++] = tmp & 0xFF
+  } else if (placeHolders === 1) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
+  }
+
+  return arr
+}
+
+function tripletToBase64 (num) {
+  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
+}
+
+function encodeChunk (uint8, start, end) {
+  var tmp
+  var output = []
+  for (var i = start; i < end; i += 3) {
+    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+    output.push(tripletToBase64(tmp))
+  }
+  return output.join('')
+}
+
+function fromByteArray (uint8) {
+  var tmp
+  var len = uint8.length
+  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
+  var output = ''
+  var parts = []
+  var maxChunkLength = 16383 // must be multiple of 3
+
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
+  }
+
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1]
+    output += lookup[tmp >> 2]
+    output += lookup[(tmp << 4) & 0x3F]
+    output += '=='
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
+    output += lookup[tmp >> 10]
+    output += lookup[(tmp >> 4) & 0x3F]
+    output += lookup[(tmp << 2) & 0x3F]
+    output += '='
+  }
+
+  parts.push(output)
+
+  return parts.join('')
+}
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
+
+  i += d
+
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  if (e === 0) {
+    e = 1 - eBias
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
+  } else {
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
+
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
+
+  value = Math.abs(value)
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0
+    e = eMax
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2)
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--
+      c *= 2
+    }
+    if (e + eBias >= 1) {
+      value += rt / c
+    } else {
+      value += rt * Math.pow(2, 1 - eBias)
+    }
+    if (value * c >= 2) {
+      e++
+      c /= 2
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0
+      e = eMax
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+  buffer[offset + i - d] |= s * 128
+}
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Generate a character map.
+ * @param {string} alphabet e.g. "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+ * @param {object} mappings map overrides from key to value
+ * @method
+ */
+
+var charmap = function (alphabet, mappings) {
+  mappings || (mappings = {});
+  alphabet.split("").forEach(function (c, i) {
+    if (!(c in mappings)) mappings[c] = i;
+  });
+  return mappings;
+}
+
+/**
+ * The RFC 4648 base 32 alphabet and character map.
+ * @see {@link https://tools.ietf.org/html/rfc4648}
+ */
+
+var rfc4648 = {
+  alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+  charmap: {
+    0: 14,
+    1: 8
+  }
+};
+
+rfc4648.charmap = charmap(rfc4648.alphabet, rfc4648.charmap);
+
+/**
+ * The Crockford base 32 alphabet and character map.
+ * @see {@link http://www.crockford.com/wrmg/base32.html}
+ */
+
+var crockford = {
+  alphabet: "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
+  charmap: {
+    O: 0,
+    I: 1,
+    L: 1
+  }
+};
+
+crockford.charmap = charmap(crockford.alphabet, crockford.charmap);
+
+/**
+ * base32hex
+ * @see {@link https://en.wikipedia.org/wiki/Base32#base32hex}
+ */
+
+var base32hex = {
+  alphabet: "0123456789ABCDEFGHIJKLMNOPQRSTUV",
+  charmap: {}
+};
+
+base32hex.charmap = charmap(base32hex.alphabet, base32hex.charmap);
+
+/**
+ * Create a new `Decoder` with the given options.
+ *
+ * @param {object} [options]
+ *   @param {string} [type] Supported Base-32 variants are "rfc4648" and
+ *     "crockford".
+ *   @param {object} [charmap] Override the character map used in decoding.
+ * @constructor
+ */
+
+function Decoder (options) {
+  this.buf = [];
+  this.shift = 8;
+  this.carry = 0;
+
+  if (options) {
+
+    switch (options.type) {
+      case "rfc4648":
+        this.charmap = exports.rfc4648.charmap;
+        break;
+      case "crockford":
+        this.charmap = exports.crockford.charmap;
+        break;
+      case "base32hex":
+        this.charmap = exports.base32hex.charmap;
+        break;
+      default:
+        throw new Error("invalid type");
+    }
+
+    if (options.charmap) this.charmap = options.charmap;
+  }
+}
+
+/**
+ * The default character map coresponds to RFC4648.
+ */
+
+Decoder.prototype.charmap = rfc4648.charmap;
+
+/**
+ * Decode a string, continuing from the previous state.
+ *
+ * @param {string} str
+ * @return {Decoder} this
+ */
+
+Decoder.prototype.write = function (str) {
+  var charmap = this.charmap;
+  var buf = this.buf;
+  var shift = this.shift;
+  var carry = this.carry;
+
+  // decode string
+  str.toUpperCase().split("").forEach(function (char) {
+
+    // ignore padding
+    if (char == "=") return;
+
+    // lookup symbol
+    var symbol = charmap[char] & 0xff;
+
+    // 1: 00000 000
+    // 2:          00 00000 0
+    // 3:                    0000 0000
+    // 4:                             0 00000 00
+    // 5:                                       000 00000
+    // 6:                                                00000 000
+    // 7:                                                         00 00000 0
+
+    shift -= 5;
+    if (shift > 0) {
+      carry |= symbol << shift;
+    } else if (shift < 0) {
+      buf.push(carry | (symbol >> -shift));
+      shift += 8;
+      carry = (symbol << shift) & 0xff;
+    } else {
+      buf.push(carry | symbol);
+      shift = 8;
+      carry = 0;
+    }
+  });
+
+  // save state
+  this.shift = shift;
+  this.carry = carry;
+
+  // for chaining
+  return this;
+};
+
+/**
+ * Finish decoding.
+ *
+ * @param {string} [str] The final string to decode.
+ * @return {Array} Decoded byte array.
+ */
+
+Decoder.prototype.finalize = function (str) {
+  if (str) {
+    this.write(str);
+  }
+  if (this.shift !== 8 && this.carry !== 0) {
+    this.buf.push(this.carry);
+    this.shift = 8;
+    this.carry = 0;
+  }
+  return this.buf;
+};
+
+/**
+ * Create a new `Encoder` with the given options.
+ *
+ * @param {object} [options]
+ *   @param {string} [type] Supported Base-32 variants are "rfc4648" and
+ *     "crockford".
+ *   @param {object} [alphabet] Override the alphabet used in encoding.
+ * @constructor
+ */
+
+function Encoder (options) {
+  this.buf = "";
+  this.shift = 3;
+  this.carry = 0;
+
+  if (options) {
+
+    switch (options.type) {
+      case "rfc4648":
+        this.alphabet = exports.rfc4648.alphabet;
+        break;
+      case "crockford":
+        this.alphabet = exports.crockford.alphabet;
+        break;
+      case "base32hex":
+        this.alphabet = exports.base32hex.alphabet;
+        break;
+      default:
+        throw new Error("invalid type");
+    }
+
+    if (options.alphabet) this.alphabet = options.alphabet;
+    else if (options.lc) this.alphabet = this.alphabet.toLowerCase();
+  }
+}
+
+/**
+ * The default alphabet coresponds to RFC4648.
+ */
+
+Encoder.prototype.alphabet = rfc4648.alphabet;
+
+/**
+ * Encode a byte array, continuing from the previous state.
+ *
+ * @param {byte[]} buf The byte array to encode.
+ * @return {Encoder} this
+ */
+
+Encoder.prototype.write = function (buf) {
+  var shift = this.shift;
+  var carry = this.carry;
+  var symbol;
+  var byte;
+  var i;
+
+  // encode each byte in buf
+  for (i = 0; i < buf.length; i++) {
+    byte = buf[i];
+
+    // 1: 00000 000
+    // 2:          00 00000 0
+    // 3:                    0000 0000
+    // 4:                             0 00000 00
+    // 5:                                       000 00000
+    // 6:                                                00000 000
+    // 7:                                                         00 00000 0
+
+    symbol = carry | (byte >> shift);
+    this.buf += this.alphabet[symbol & 0x1f];
+
+    if (shift > 5) {
+      shift -= 5;
+      symbol = byte >> shift;
+      this.buf += this.alphabet[symbol & 0x1f];
+    }
+
+    shift = 5 - shift;
+    carry = byte << shift;
+    shift = 8 - shift;
+  }
+
+  // save state
+  this.shift = shift;
+  this.carry = carry;
+
+  // for chaining
+  return this;
+};
+
+/**
+ * Finish encoding.
+ *
+ * @param {byte[]} [buf] The final byte array to encode.
+ * @return {string} The encoded byte array.
+ */
+
+Encoder.prototype.finalize = function (buf) {
+  if (buf) {
+    this.write(buf);
+  }
+  if (this.shift !== 3) {
+    this.buf += this.alphabet[this.carry & 0x1f];
+    this.shift = 3;
+    this.carry = 0;
+  }
+  return this.buf;
+};
+
+/**
+ * Convenience encoder.
+ *
+ * @param {byte[]} buf The byte array to encode.
+ * @param {object} [options] Options to pass to the encoder.
+ * @return {string} The encoded string.
+ */
+
+exports.encode = function (buf, options) {
+  return new Encoder(options).finalize(buf);
+};
+
+/**
+ * Convenience decoder.
+ *
+ * @param {string} str The string to decode.
+ * @param {object} [options] Options to pass to the decoder.
+ * @return {byte[]} The decoded byte array.
+ */
+
+exports.decode = function (str, options) {
+  return new Decoder(options).finalize(str);
+};
+
+// Exports.
+exports.Decoder = Decoder;
+exports.Encoder = Encoder;
+exports.charmap = charmap;
+exports.crockford = crockford;
+exports.rfc4648 = rfc4648;
+exports.base32hex = base32hex;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+var __WEBPACK_AMD_DEFINE_RESULT__;/*
+ A JavaScript implementation of the SHA family of hashes, as
+ defined in FIPS PUB 180-4 and FIPS PUB 202, as well as the corresponding
+ HMAC implementation as defined in FIPS PUB 198a
+
+ Copyright Brian Turek 2008-2017
+ Distributed under the BSD License
+ See http://caligatio.github.com/jsSHA/ for more information
+
+ Several functions taken from Paul Johnston
+*/
+(function(G){function r(d,b,c){var h=0,a=[],f=0,g,m,k,e,l,p,q,t,w=!1,n=[],u=[],v,r=!1;c=c||{};g=c.encoding||"UTF8";v=c.numRounds||1;if(v!==parseInt(v,10)||1>v)throw Error("numRounds must a integer >= 1");if("SHA-1"===d)l=512,p=z,q=H,e=160,t=function(a){return a.slice()};else throw Error("Chosen SHA variant is not supported");k=A(b,g);m=x(d);this.setHMACKey=function(a,f,b){var c;if(!0===w)throw Error("HMAC key already set");if(!0===r)throw Error("Cannot set HMAC key after calling update");
+g=(b||{}).encoding||"UTF8";f=A(f,g)(a);a=f.binLen;f=f.value;c=l>>>3;b=c/4-1;if(c<a/8){for(f=q(f,a,0,x(d),e);f.length<=b;)f.push(0);f[b]&=4294967040}else if(c>a/8){for(;f.length<=b;)f.push(0);f[b]&=4294967040}for(a=0;a<=b;a+=1)n[a]=f[a]^909522486,u[a]=f[a]^1549556828;m=p(n,m);h=l;w=!0};this.update=function(b){var e,g,c,d=0,q=l>>>5;e=k(b,a,f);b=e.binLen;g=e.value;e=b>>>5;for(c=0;c<e;c+=q)d+l<=b&&(m=p(g.slice(c,c+q),m),d+=l);h+=d;a=g.slice(d>>>5);f=b%l;r=!0};this.getHash=function(b,g){var c,k,l,p;if(!0===
+w)throw Error("Cannot call getHash after setting HMAC key");l=B(g);switch(b){case "HEX":c=function(a){return C(a,e,l)};break;case "B64":c=function(a){return D(a,e,l)};break;case "BYTES":c=function(a){return E(a,e)};break;case "ARRAYBUFFER":try{k=new ArrayBuffer(0)}catch(I){throw Error("ARRAYBUFFER not supported by this environment");}c=function(a){return F(a,e)};break;default:throw Error("format must be HEX, B64, BYTES, or ARRAYBUFFER");}p=q(a.slice(),f,h,t(m),e);for(k=1;k<v;k+=1)p=q(p,e,0,x(d),e);
+return c(p)};this.getHMAC=function(b,g){var c,k,n,r;if(!1===w)throw Error("Cannot call getHMAC without first setting HMAC key");n=B(g);switch(b){case "HEX":c=function(a){return C(a,e,n)};break;case "B64":c=function(a){return D(a,e,n)};break;case "BYTES":c=function(a){return E(a,e)};break;case "ARRAYBUFFER":try{c=new ArrayBuffer(0)}catch(I){throw Error("ARRAYBUFFER not supported by this environment");}c=function(a){return F(a,e)};break;default:throw Error("outputFormat must be HEX, B64, BYTES, or ARRAYBUFFER");
+}k=q(a.slice(),f,h,t(m),e);r=p(u,x(d));r=q(k,e,l,r,e);return c(r)}}function C(d,b,c){var h="";b/=8;var a,f;for(a=0;a<b;a+=1)f=d[a>>>2]>>>8*(3+a%4*-1),h+="0123456789abcdef".charAt(f>>>4&15)+"0123456789abcdef".charAt(f&15);return c.outputUpper?h.toUpperCase():h}function D(d,b,c){var h="",a=b/8,f,g,m;for(f=0;f<a;f+=3)for(g=f+1<a?d[f+1>>>2]:0,m=f+2<a?d[f+2>>>2]:0,m=(d[f>>>2]>>>8*(3+f%4*-1)&255)<<16|(g>>>8*(3+(f+1)%4*-1)&255)<<8|m>>>8*(3+(f+2)%4*-1)&255,g=0;4>g;g+=1)8*f+6*g<=b?h+="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(m>>>
+6*(3-g)&63):h+=c.b64Pad;return h}function E(d,b){var c="",h=b/8,a,f;for(a=0;a<h;a+=1)f=d[a>>>2]>>>8*(3+a%4*-1)&255,c+=String.fromCharCode(f);return c}function F(d,b){var c=b/8,h,a=new ArrayBuffer(c),f;f=new Uint8Array(a);for(h=0;h<c;h+=1)f[h]=d[h>>>2]>>>8*(3+h%4*-1)&255;return a}function B(d){var b={outputUpper:!1,b64Pad:"=",shakeLen:-1};d=d||{};b.outputUpper=d.outputUpper||!1;!0===d.hasOwnProperty("b64Pad")&&(b.b64Pad=d.b64Pad);if("boolean"!==typeof b.outputUpper)throw Error("Invalid outputUpper formatting option");
+if("string"!==typeof b.b64Pad)throw Error("Invalid b64Pad formatting option");return b}function A(d,b){var c;switch(b){case "UTF8":case "UTF16BE":case "UTF16LE":break;default:throw Error("encoding must be UTF8, UTF16BE, or UTF16LE");}switch(d){case "HEX":c=function(b,a,f){var g=b.length,c,d,e,l,p;if(0!==g%2)throw Error("String of HEX type must be in byte increments");a=a||[0];f=f||0;p=f>>>3;for(c=0;c<g;c+=2){d=parseInt(b.substr(c,2),16);if(isNaN(d))throw Error("String of HEX type contains invalid characters");
+l=(c>>>1)+p;for(e=l>>>2;a.length<=e;)a.push(0);a[e]|=d<<8*(3+l%4*-1)}return{value:a,binLen:4*g+f}};break;case "TEXT":c=function(c,a,f){var g,d,k=0,e,l,p,q,t,n;a=a||[0];f=f||0;p=f>>>3;if("UTF8"===b)for(n=3,e=0;e<c.length;e+=1)for(g=c.charCodeAt(e),d=[],128>g?d.push(g):2048>g?(d.push(192|g>>>6),d.push(128|g&63)):55296>g||57344<=g?d.push(224|g>>>12,128|g>>>6&63,128|g&63):(e+=1,g=65536+((g&1023)<<10|c.charCodeAt(e)&1023),d.push(240|g>>>18,128|g>>>12&63,128|g>>>6&63,128|g&63)),l=0;l<d.length;l+=1){t=k+
+p;for(q=t>>>2;a.length<=q;)a.push(0);a[q]|=d[l]<<8*(n+t%4*-1);k+=1}else if("UTF16BE"===b||"UTF16LE"===b)for(n=2,d="UTF16LE"===b&&!0||"UTF16LE"!==b&&!1,e=0;e<c.length;e+=1){g=c.charCodeAt(e);!0===d&&(l=g&255,g=l<<8|g>>>8);t=k+p;for(q=t>>>2;a.length<=q;)a.push(0);a[q]|=g<<8*(n+t%4*-1);k+=2}return{value:a,binLen:8*k+f}};break;case "B64":c=function(b,a,f){var c=0,d,k,e,l,p,q,n;if(-1===b.search(/^[a-zA-Z0-9=+\/]+$/))throw Error("Invalid character in base-64 string");k=b.indexOf("=");b=b.replace(/\=/g,
+"");if(-1!==k&&k<b.length)throw Error("Invalid '=' found in base-64 string");a=a||[0];f=f||0;q=f>>>3;for(k=0;k<b.length;k+=4){p=b.substr(k,4);for(e=l=0;e<p.length;e+=1)d="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(p[e]),l|=d<<18-6*e;for(e=0;e<p.length-1;e+=1){n=c+q;for(d=n>>>2;a.length<=d;)a.push(0);a[d]|=(l>>>16-8*e&255)<<8*(3+n%4*-1);c+=1}}return{value:a,binLen:8*c+f}};break;case "BYTES":c=function(b,a,c){var d,m,k,e,l;a=a||[0];c=c||0;k=c>>>3;for(m=0;m<b.length;m+=
+1)d=b.charCodeAt(m),l=m+k,e=l>>>2,a.length<=e&&a.push(0),a[e]|=d<<8*(3+l%4*-1);return{value:a,binLen:8*b.length+c}};break;case "ARRAYBUFFER":try{c=new ArrayBuffer(0)}catch(h){throw Error("ARRAYBUFFER not supported by this environment");}c=function(b,a,c){var d,m,k,e,l;a=a||[0];c=c||0;m=c>>>3;l=new Uint8Array(b);for(d=0;d<b.byteLength;d+=1)e=d+m,k=e>>>2,a.length<=k&&a.push(0),a[k]|=l[d]<<8*(3+e%4*-1);return{value:a,binLen:8*b.byteLength+c}};break;default:throw Error("format must be HEX, TEXT, B64, BYTES, or ARRAYBUFFER");
+}return c}function n(d,b){return d<<b|d>>>32-b}function u(d,b){var c=(d&65535)+(b&65535);return((d>>>16)+(b>>>16)+(c>>>16)&65535)<<16|c&65535}function y(d,b,c,h,a){var f=(d&65535)+(b&65535)+(c&65535)+(h&65535)+(a&65535);return((d>>>16)+(b>>>16)+(c>>>16)+(h>>>16)+(a>>>16)+(f>>>16)&65535)<<16|f&65535}function x(d){var b=[];if("SHA-1"===d)b=[1732584193,4023233417,2562383102,271733878,3285377520];else throw Error("No SHA variants supported");return b}function z(d,b){var c=[],h,a,f,g,m,k,e;h=b[0];a=b[1];
+f=b[2];g=b[3];m=b[4];for(e=0;80>e;e+=1)c[e]=16>e?d[e]:n(c[e-3]^c[e-8]^c[e-14]^c[e-16],1),k=20>e?y(n(h,5),a&f^~a&g,m,1518500249,c[e]):40>e?y(n(h,5),a^f^g,m,1859775393,c[e]):60>e?y(n(h,5),a&f^a&g^f&g,m,2400959708,c[e]):y(n(h,5),a^f^g,m,3395469782,c[e]),m=g,g=f,f=n(a,30),a=h,h=k;b[0]=u(h,b[0]);b[1]=u(a,b[1]);b[2]=u(f,b[2]);b[3]=u(g,b[3]);b[4]=u(m,b[4]);return b}function H(d,b,c,h){var a;for(a=(b+65>>>9<<4)+15;d.length<=a;)d.push(0);d[b>>>5]|=128<<24-b%32;b+=c;d[a]=b&4294967295;d[a-1]=b/4294967296|0;
+b=d.length;for(a=0;a<b;a+=16)h=z(d.slice(a,a+16),h);return h} true?!(__WEBPACK_AMD_DEFINE_RESULT__ = function(){return r}.call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):"undefined"!==typeof exports?("undefined"!==typeof module&&module.exports&&(module.exports=r),exports=r):G.jsSHA=r})(this);
+
+
+/***/ })
+/******/ ]);

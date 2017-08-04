@@ -1,9 +1,8 @@
-// // Use browser-version of Nodejs buffer
-// const Buffer = require('./vendor/buffer')
-//const base32 = require('./vendor/base32')
-
-const Buffer = buffer.Buffer
-
+// Use browser-version of Nodejs buffer
+const Buffer = require('buffer/').Buffer
+const base32 = require('base32.js')
+const jsSHA = require('jssha/src/sha1')
+//const Buffer = buffer.Buffer
 
 /**
  * OTP manager class to generate RFC 4226 compliant HMAC-based one-time passwords (HOTPs),
@@ -20,6 +19,39 @@ class OTP {
       }
 
       this.secret = String(secret)
+    }
+
+    /**
+     * Calculate a time-based one-time password (TOTP), as defined in RFC-6238
+     * A TOTP is just an HOTP, using a time interval as the counter.
+     * @returns {string} A six-digit OTP value
+     */
+    getTOTP () {
+      // Get the current epoch, rounded to intervals of 30 seconds
+      let now = Math.floor((new Date()).getTime() / 1000)
+      const epoch = Math.floor(now / 30)
+
+      // Calcule an HOTP using the epoch as the counter
+      return this.getHOTP(String(epoch))
+    }
+
+    /**
+     * Calculate a 6-digit HMAC-based one-time password (HOTP), as defined in RFC-4226
+     * @param {string} counter A distinct counter value used to generate an OTP with the secret.
+     * @returns {string} A six-digit OTP value
+     */
+    getHOTP (counter) {
+      // Calculate an HMAC encoded value from the secret and counter values
+      counter = this.encodeCounter(counter)
+      const hmacDigest = this.getHmacDigest(this.secret, counter)
+
+      // Extract a dynamically truncated binary code from the HMAC result
+      const binaryCode = this.getBinaryCode(hmacDigest)
+
+      // Convert the binary code to a number between 0 and 1,000,000
+      const hotp = this.convertToHotp(binaryCode, 6)
+
+      return hotp
     }
 
     /**
@@ -75,55 +107,10 @@ class OTP {
       return String(otp).padStart(digits, '0')
     }
 
-    /**
-     * Calculate a 6-digit HMAC-based one-time password (HOTP), as defined in RFC-4226
-     * @param {string} counter A distinct counter value used to generate an OTP with the secret.
-     * @returns {string} A six-digit OTP value
-     */
-    getHOTP (counter) {
-      // Calculate an HMAC encoded value from the secret and counter values
-      counter = this.encodeCounter(counter)
-      const hmacDigest = this.getHmacDigest(this.secret, counter)
-
-      // Extract a dynamically truncated binary code from the HMAC result
-      const binaryCode = this.getBinaryCode(hmacDigest)
-
-      // Convert the binary code to a number between 0 and 1,000,000
-      const hotp = this.convertToHotp(binaryCode, 6)
-
-      return hotp
-    }
-
-    /**
-     * Calculate a time-based one-time password (TOTP), as defined in RFC-6238
-     * A TOTP is just an HOTP, using a time interval as the counter.
-     * @returns {string} A six-digit OTP value
-     */
-    getTOTP () {
-      // Get the current epoch, rounded to intervals of 30 seconds
-      let now = Math.floor((new Date()).getTime() / 1000)
-      const epoch = Math.floor(now / 30)
-
-      // Calcule an HOTP using the epoch as the counter
-      return this.getHOTP(String(epoch))
-    }
 
     /** Static helper to generate random numbers */
     static getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min) + min)
-    }
-
-    /**
-     * Convert Buffer to ArrayBuffer
-     * From https://stackoverflow.com/a/12101012
-    */
-    toArrayBuffer (buf) {
-      let ab = new ArrayBuffer(buf.length);
-      let view = new Uint8Array(ab);
-      for (let i = 0; i < buf.length; ++i) {
-          view[i] = buf[i];
-      }
-      return ab;
     }
 
     /** Return base-32 encoded secret. */
@@ -149,4 +136,4 @@ class OTP {
     }
 }
 
-// module.exports = OTP
+module.exports = OTP

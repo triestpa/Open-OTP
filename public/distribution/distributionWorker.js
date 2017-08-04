@@ -1,5 +1,6 @@
 //importScripts('prng.js')
-importScripts('sjcl.js')
+importScripts('vendor/buffer.js')
+importScripts('vendor/sha1.js')
 importScripts('otp.js')
 
 /** Helper function to generate a random number using our PRNG */

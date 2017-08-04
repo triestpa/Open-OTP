@@ -1,4 +1,4 @@
-// const OTP = require('./otp')
+const OTP = require('./otp')
 // const QRCode = require('./vendor/qrcode.min')
 
 /**
@@ -10,9 +10,7 @@ if (navigator.serviceWorker) {
   navigator.serviceWorker.register('sw.js').catch(console.error);
 }
 
-// var generator = new OTP(secret)
 var qrcode = new QRCode(document.getElementById("qrcode"), {
-  correctLevel : QRCode.CorrectLevel.H,
   width: 250,
   height: 250
 })

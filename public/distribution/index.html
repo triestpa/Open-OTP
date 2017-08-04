@@ -28,7 +28,7 @@ const chart = Highcharts.chart('container', {
 })
 
 // Start PRNG webworker
-const prngWorker = new Worker('distributionWorker.js');
+const prngWorker = new Worker('distribution/distributionWorker.js');
 
 // Process webworker data
 prngWorker.onmessage = function(e) {
