@@ -1,3 +1,6 @@
+// const OTP = require('./otp')
+// const QRCode = require('./vendor/qrcode.min')
+
 /**
  * App controller
  */
@@ -40,11 +43,11 @@ function randomizeSecret () {
 function setSecret (newSecret) {
   generator = new OTP(secret)
   document.getElementById('secret').value = secret
-  setQRCode(secret)
+  setQRCode(generator)
 }
 
-function setQRCode (secret, label = 'test') {
-  secretb32 = base32.encode(Buffer(secret)).toString().replace(/=/g, '');
+function setQRCode (generator, label = 'test') {
+  secretb32 =  generator.getBase32Secret()
   let qrContent = `otpauth://totp/${label}?secret=${secretb32}`
   console.log(qrContent)
   qrcode.clear()
@@ -62,18 +65,10 @@ function setSecret (newSecret) {
   try {
     generator = new OTP(newSecret)
     secret = newSecret
-    setQRCode(newSecret)
+    setQRCode(generator)
   } catch (err) {
     console.error(err.message)
   }
 
   secretInput.value = secret
-}
-
-function importSecret (newSecret, encoding) {
-  if (encoding === 'base32') {
-    newSecret = base32.decode(newSecret);
-  }
-
-  setSecret(newSecret)
 }
