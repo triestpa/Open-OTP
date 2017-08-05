@@ -3,33 +3,37 @@ const webpack = require("webpack");
 const BabiliPlugin = require("babili-webpack-plugin");
 
 module.exports = {
-    entry: "./src/app.js",
+    entry: "./src/main.js",
     output: {
         path: path.resolve(__dirname, "public"),
         filename: "bundle.js"
     },
     module: {
         loaders: [
-            { test: /\.css$/, loader: "style!css" },
             {
-                loader: "babel-loader",
-
-                // Skip any files outside of your project's `src` directory
-                include: [
-                    path.resolve(__dirname, "src"),
-                ],
-
-                // Only run `.js` and `.jsx` files through Babel
-                test: /\.js$/,
-
-                // Options to configure babel with
-                query: {
-                    presets: ['es2016'],
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                options: {
+                    loaders: {
+                        'scss': 'vue-style-loader!css-loader!sass-loader',
+                        'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
+                    }
                 }
             },
+            {
+                loader: "babel-loader",
+                include: [ path.resolve(__dirname, "src") ],
+                test: /\.js$/,
+                query: { presets: ['es2017'] }
+            }
         ]
     },
     plugins: [
-        new BabiliPlugin({})
+        new BabiliPlugin({}),
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify('production')
+            }
+        })
     ]
 };
