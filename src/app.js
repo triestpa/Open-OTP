@@ -1,5 +1,5 @@
-const OTP = require('./otp')
-// const QRCode = require('./vendor/qrcode.min')
+const OTP = require('tiny-otp')
+const QRious = require('qrious')
 
 /**
  * App controller
@@ -10,12 +10,13 @@ if (navigator.serviceWorker) {
   navigator.serviceWorker.register('sw.js').catch(console.error);
 }
 
-var qrcode = new QRCode(document.getElementById("qrcode"), {
-  width: 250,
-  height: 250
-})
+const qr = new QRious({
+  element: document.getElementById('qr'),
+  size: 250,
+  level: 'H'
+});
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
   // Use var for these variables, since we want them in the global scope.
   var secret = OTP.getRandomInt(0, Math.pow(10, 12))
 
@@ -27,8 +28,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
   setInterval(() => {
       // Update time and value every second
-      let date = new Date();
-      timeElement.textContent = date.toLocaleString();
+      let date = new Date()
+      timeElement.textContent = date.toLocaleString()
       numberElement.textContent = generator.getTOTP()
   }, 1000)
 })
@@ -47,9 +48,7 @@ function setSecret (newSecret) {
 function setQRCode (generator, label = 'test') {
   secretb32 =  generator.getBase32Secret()
   let qrContent = `otpauth://totp/${label}?secret=${secretb32}`
-  console.log(qrContent)
-  qrcode.clear()
-  qrcode.makeCode(qrContent)
+  qr.set({value: qrContent})
 }
 
 function setSecret (newSecret) {

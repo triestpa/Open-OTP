@@ -14,7 +14,8 @@
     "babel-preset-babili": "0.1.4",
     "base32.js": "0.1.0",
     "jssha": "2.3.1",
-    "qrious": "4.0.2"
+    "qrious": "4.0.2",
+    "tiny-otp": "0.0.1"
   },
   "devDependencies": {
     "babel-core": "6.25.0",
