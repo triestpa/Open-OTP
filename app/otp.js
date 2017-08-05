@@ -1,8 +1,5 @@
-// Use browser-version of Nodejs buffer
-const Buffer = require('buffer/').Buffer
 const base32 = require('base32.js')
 const jsSHA = require('jssha/src/sha1')
-//const Buffer = buffer.Buffer
 
 /**
  * OTP manager class to generate RFC 4226 compliant HMAC-based one-time passwords (HOTPs),
@@ -115,7 +112,18 @@ class OTP {
 
     /** Return base-32 encoded secret. */
     getBase32Secret () {
-      return base32.encode(Buffer(secret)).toString().replace(/=/g, '')
+      let buf = this.toUint8Array(this.secret)
+      console.log(buf)
+      return base32.encode(buf).toString().replace(/=/g, '')
+    }
+
+    /** Convert string to Uint8 array (same as a nodejs Buffer) */
+    toUint8Array(str) {
+      let buffer = new Uint8Array(str.length);
+      for (var i = 0; i < str.length; i++){
+          buffer[i] = (str.charCodeAt(i));
+      }
+      return buffer
     }
 
     /** Encode the counter values as an 8 byte array buffer. */
