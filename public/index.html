@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Authenticator</title>
-    <meta name="description" content="Psuedo-random number generator authenticator app.">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link href="/styles.css" rel="stylesheet">
-  </head>
-  <body>
-    <div class="otp-container">
-      <input id="secret" type="text">
-      <input type="button" value="Set Secret" onclick="setSecret()">
-      <input type="button" value="Randomize" onclick="randomizeSecret()">
-      <h2 id="error"></h2>
-      <h2 id="time"></h2>
-      <h2 id="number"></h2>
-      <div id="qrcode"></div>
-      <canvas id="qr"></canvas>
-    </div>
-    <a href="distribution/" target="_blank" rel="noopener">Test Psuedorandom Number Generator Distribution.</a>
+
+<head>
+  <meta charset="utf-8">
+  <title>Authenticator</title>
+  <meta name="description" content="Psuedo-random number generator authenticator app.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script>
+      /** Register service worker */
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.register('sw.js').catch(console.error);
+      }
+    </script>
     <script src="bundle.js"></script>
-  </body>
+</body>
+
 </html>
