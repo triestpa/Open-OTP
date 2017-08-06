@@ -7,40 +7,25 @@ import QRious from 'qrious'
 
 export default {
   name: 'qr-code',
-
-  data () {
-    return {
-      qr: null,
+  props: { content: String },
+  watch: {
+    content: (value) => {
+      console.log(value)
+      this.qr.set({value})
     }
   },
-
-  created () {
-
-  },
-
   mounted () {
-    console.log(this.$refs.qr)
     this.qr = new QRious({
-      element: this.$refs.qr, //document.getElementById('qr'),
+      element: this.$refs.qr,
       size: 250,
       level: 'H',
-      value: 'this is a test'
+      value: 'this is a test',
+      value: this.content
     });
-  },
-
-  methods: {
-    setQRCode (label = 'test') {
-      let secretb32 =  this.generator.getBase32Secret()
-      let qrContent = `otpauth://totp/${label}?secret=${secretb32}`
-      this.qr.set({value: qrContent})
-    }
   }
 }
-
 </script>
 
-<style lang="scss">
-
-
+<style lang="scss" scoped>
 
 </style>
