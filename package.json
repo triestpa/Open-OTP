@@ -11,11 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "crypto-js": "3.1.9-1",
+    "normalize.css": "7.0.0",
     "qrious": "4.0.2",
     "tiny-otp": "0.0.5",
     "vue": "2.4.2"
   },
   "devDependencies": {
+    "ajv": "5.2.2",
     "babel-core": "6.25.0",
     "babel-loader": "7.1.1",
     "babel-preset-babili": "0.1.4",
