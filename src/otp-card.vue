@@ -5,12 +5,12 @@
     <div class="content">
       <input type="text" v-model="pendingSecret">
       <div>
-        <a type="button" class="button" v-on:click="setSecret(pendingSecret)">Set OTP</a>
+        <a type="button" class="button" v-on:click="setSecret(pendingSecret)">Set Secret</a>
         <a type="button" class="button" v-on:click="setSecret(secret)">Reset</a>
         <a type="button" class="button" v-on:click="randomizeSecret()">Random</a>
       </div>
-      <h1>{{ otp }}</h1>
-      <small>{{ time }}</small>
+      <h1>OTP: {{ otp }}</h1>
+      <small>Time Remaining: {{ time }}</small>
     </div>
   </section>
 </template>
@@ -53,9 +53,9 @@ export default {
   mounted () {
    setInterval(() => {
         // Update time and value every second
-        this.time = new Date().toLocaleString()
+        this.time = 30 - (new Date().getSeconds() % 30)
         this.otp = this.generator.getTOTP()
-    }, 700)
+    }, 120)
   },
 
   methods: {

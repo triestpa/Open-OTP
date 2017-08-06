@@ -2,8 +2,14 @@
   <div id="app">
     <h1>Open OTP</h1>
     <p>An open-sourced, web-based, offline-first, time-based one-time-password generator.  The OTPs generated here are directly compatible with Google Authenticator.</p>
+    <p>This is the not-yet-designed POC version.</p>
     <p>The app generates a new 6-digit OTP every 30 seconds, based on the shared secret value.</p>
-    <p>The secret is also encoded bellow as a QR code.  Try scanning it with Google-Authenticator to verify that the generated OTPs are in sync.</p>
+    <p>The secret is also encoded bellow as a QR code.  Try scanning it with Google Authenticator to verify that the generated OTPs are in sync.</p>
+    <h4>Check Out The Source Code and Contribute!</h4>
+    <ul>
+      <li><a target="_blank" rel="noopener" href="https://github.com/triestpa/Open-OTP">Open-OTP Project Github Repo</a></li>
+      <li><a target="_blank" rel="noopener" href="https://github.com/triestpa/Tiny-OTP">Tiny-OTP Library Github Repo</a></li>
+    </ul>
 
     <div class="otp-card-list">
       <div class="otp-card-container" v-for="(otp, index) in otps" :key="index">
