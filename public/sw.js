@@ -6,17 +6,17 @@
 */
 
 const CACHE = 'authenticator-v1'
-const PRECACHE_URLS = [ 'index.html', 'script.js', 'styles.css' ]
+const PRECACHE_URLS = [ 'index.html', 'bundle.js' ]
 
 /** Precache resouces on SW install  */
 self.addEventListener('install', function (event) {
   event.waitUntil(preCache().then(() => self.skipWaiting()))
-});
+})
 
 /** Claim client on SW activate */
 self.addEventListener('activate', function(event) {
   event.waitUntil(self.clients.claim());
-});
+})
 
 /** Handle resource fetch */
 self.addEventListener('fetch', function (event) {

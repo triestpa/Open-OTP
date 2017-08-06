@@ -9,19 +9,25 @@ export default {
   name: 'qr-code',
   props: { content: String },
   watch: {
-    content: (value) => {
-      console.log(value)
-      this.qr.set({value})
+    content: function (value) {
+      this.updateQR(value)
     }
   },
   mounted () {
-    this.qr = new QRious({
-      element: this.$refs.qr,
-      size: 250,
-      level: 'H',
-      value: 'this is a test',
-      value: this.content
-    });
+    this.instantiateQR()
+  },
+  methods: {
+    instantiateQR () {
+      this.qr = new QRious({
+        element: this.$refs.qr,
+        size: 250,
+        level: 'H',
+        value: this.content
+      })
+    },
+    updateQR (value) {
+      this.qr.set({value})
+    }
   }
 }
 </script>

@@ -1,11 +1,15 @@
 <template>
   <div id="app">
+    <h1>Open OTP</h1>
+    <p>An open-sourced, web-based, offline-first, time-based one-time-password generator.  The OTPs generated here are directly compatible with Google Authenticator.</p>
+    <p>The app generates a new 6-digit OTP every 30 seconds, based on the shared secret value.</p>
+    <p>The secret is also encoded bellow as a QR code.  Try scanning it with Google-Authenticator to verify that the generated OTPs are in sync.</p>
+
     <div class="otp-card-list">
       <div class="otp-card-container" v-for="(otp, index) in otps" :key="index">
         <otp-card :name="otp.name" :secret="otp.secret"></otp-card>
       </div>
     </div>
-    <a href="distribution/" target="_blank" rel="noopener">Test Psuedorandom Number Generator Distribution.</a>
   </div>
 </template>
 
@@ -61,7 +65,7 @@ export default {
 }
 
 #app {
-
+  padding: 12px;
 }
 
 </style>
