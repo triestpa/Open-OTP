@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "crypto-js": "3.1.9-1",
+    "muicss": "0.9.20",
     "normalize.css": "7.0.0",
     "qrious": "4.0.2",
     "tiny-otp": "0.0.5",
