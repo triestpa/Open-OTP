@@ -21,7 +21,7 @@
 
 <script>
 import AES from 'crypto-js/aes'
-import utf8 from 'crypto-js/enc-utf8';
+import utf8 from 'crypto-js/enc-utf8'
 import otpCard from './otp-card.vue'
 
 export default {
@@ -64,6 +64,7 @@ export default {
 
 <style lang="scss">
 @import "~normalize.css/normalize.css";
+@import "~muicss/dist/css/mui.css";
 @import "_variables.scss";
 
 .otp-card-list {

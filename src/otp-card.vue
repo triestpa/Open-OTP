@@ -1,13 +1,18 @@
 <template>
-  <section class="otp-card">
-    <p>{{ name }}</p>
-    <qr-code class="qrcode" :content="qrContent"></qr-code>
+  <section class="mui-panel otp-card">
+    <h3>{{ name }}</h3>
+    <div class="qr-container">
+      <qr-code class="qrcode" :content="qrContent"></qr-code>
+    </div>
     <div class="content">
-      <input type="text" v-model="pendingSecret">
+      <div class="seed-input-textfield mui-textfield">
+        <input type="text" v-model="pendingSecret">
+        <label>OTP Seed Value</label>
+      </div>
       <div>
-        <a type="button" class="button" v-on:click="setSecret(pendingSecret)">Set Secret</a>
-        <a type="button" class="button" v-on:click="setSecret(secret)">Reset</a>
-        <a type="button" class="button" v-on:click="randomizeSecret()">Random</a>
+        <button class="mui-btn mui-btn--primary" v-on:click="setSecret(pendingSecret)">Set Secret</button>
+        <button class="mui-btn mui-btn--primary" v-on:click="setSecret(secret)">Reset</button>
+        <button class="mui-btn mui-btn--primary" v-on:click="randomizeSecret()">Random</button>
       </div>
       <h1>OTP: {{ otp }}</h1>
       <small>Time Remaining: {{ time }}</small>
@@ -88,26 +93,16 @@ export default {
 
 <style lang="scss" scoped>
 
-input {
+.seed-input-textfield {
   margin: 12px;
 }
 
-.otp-card {
-  padding: 24px;
-  border: 1px solid black;
-  border-radius: 6px;
+.qr-container {
   text-align: center;
-  margin: 24px;
 }
 
 .qrcode {
   padding: 12px;
-}
-
-.button {
-  padding: 12px;
-  cursor: pointer;
-  user-select: none;
 }
 
 </style>
