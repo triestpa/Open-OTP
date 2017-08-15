@@ -1,16 +1,16 @@
 <template>
   <div>
-    <div class="ko-progress-circle" :data-progress="Math.floor(progress)">
-        <div class="ko-circle">
-            <div class="full ko-progress-circle__slice">
-                <div class="ko-progress-circle__fill" :style="transitionStyle"></div>
+    <div class="progress-circle" :data-progress="Math.floor(progress)">
+        <div class="circle">
+            <div class="full progress-circle__slice">
+                <div class="progress-circle__fill"></div>
           </div>
-            <div class="ko-progress-circle__slice" :style="transitionStyle">
-                <div class="ko-progress-circle__fill" :style="transitionStyle"></div>
-                <div class="ko-progress-circle__fill ko-progress-circle__bar" :style="transitionStyle"></div>
+            <div class="progress-circle__slice">
+                <div class="progress-circle__fill"></div>
+                <div class="progress-circle__fill progress-circle__bar"></div>
             </div>
         </div>
-        <div class="ko-progress-circle__overlay">test</div>
+        <div class="progress-circle__overlay">{{ countDown }}</div>
     </div>
   </div>
 </template>
@@ -18,25 +18,30 @@
 <script>
 export default {
   name: 'progress-circle',
-  props: { interval: Number },
+  props: {
+    interval: Number,
+  },
+  computed: {
+    progress () {
+      return (this.intervalValue / this.interval) * 100
+    },
+    countDown () {
+      return this.interval - this.intervalValue
+    }
+  },
   data () {
     return {
-      transitionStyle: {
-        transition: `transform ${this.interval / 100}s linear`,
-      },
-      progress: this.getProgress()
+      intervalValue: this.getCurrentIntervalValue(),
     }
   },
   mounted () {
     setInterval(() => {
-      this.progress = this.getProgress()
+      this.intervalValue = this.getCurrentIntervalValue()
     }, 10)
   },
   methods: {
-    getProgress () {
-      let now = (new Date().getTime() / 1000) % this.interval
-      let progress = (now / this.interval) * 100
-      return progress
+    getCurrentIntervalValue () {
+      return Math.floor((new Date().getTime() / 1000) % this.interval)
     }
   }
 }
@@ -48,10 +53,11 @@ $circle-size: 120px;
 $circle-background: #c2c2c2;
 $circle-color: #2db8e8;
 $inset-size: 105px;
-$inset-color: #fff;
+$inset-color: white;
+$inset-text-color: black;
 // $transition-length: calc(30s / 100);
 
-.ko-progress-circle {
+.progress-circle {
 	margin: 20px auto;
 	width:  $circle-size;
 	height: $circle-size;
@@ -59,7 +65,7 @@ $inset-color: #fff;
 	background-color: $circle-background;
 	border-radius: 50%;
 
-		.ko-progress-circle__slice, .ko-progress-circle__fill {
+		.progress-circle__slice, .progress-circle__fill {
 			width:    $circle-size;
 			height:   $circle-size;
 			position: absolute;
@@ -68,15 +74,15 @@ $inset-color: #fff;
 			border-radius: 50%;
 		}
 
-		.ko-progress-circle__slice {
+		.progress-circle__slice {
 			clip: rect(0px, $circle-size, $circle-size, $circle-size/2);
-			.ko-progress-circle__fill {
+			.progress-circle__fill {
 				clip: rect(0px, $circle-size/2, $circle-size, 0px);
 				background-color: $circle-color;
 			}
 	}
 
-	.ko-progress-circle__overlay {
+	.progress-circle__overlay {
 		width:       $inset-size;
 		height:      $inset-size;
 		position:    absolute;
@@ -84,8 +90,9 @@ $inset-color: #fff;
 		margin-top:  ($circle-size - $inset-size)/2;
     line-height: $inset-size;
     text-align: center;
-
 		background-color: $inset-color;
+    color: $inset-text-color;
+    font-size: xx-large;
 		border-radius: 50%;
 	}
 
@@ -94,10 +101,10 @@ $inset-color: #fff;
 
 	@while $i <= 100 {
 		&[data-progress='#{$i}'] {
-				.ko-progress-circle__slice.full, .ko-progress-circle__fill {
+				.progress-circle__slice.full, .progress-circle__fill {
           transform: rotate($increment * $i);
 				}
-				.ko-progress-circle__fill.ko-progress-circle__bar {
+				.progress-circle__fill.progress-circle__bar {
 					transform: rotate($increment * $i * 2);
 				}
       $i: $i + 1;

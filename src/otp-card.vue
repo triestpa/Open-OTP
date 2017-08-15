@@ -1,22 +1,34 @@
 <template>
   <section class="mui-panel otp-card">
     <h3>{{ name }}</h3>
-    <progress-circle interval="30"></progress-circle>
-    <div class="qr-container">
-      <qr-code class="qrcode" :content="qrContent"></qr-code>
-    </div>
     <div class="content">
-      <div class="seed-input-textfield mui-textfield">
-        <input type="text" v-model="pendingSecret">
-        <label>OTP Seed Value</label>
+      <div v-if="!secret">
+        <div class="seed-input-textfield mui-textfield">
+          <input type="text" v-model="pendingSecret">
+          <label>OTP Seed Value</label>
+        </div>
+        <div>
+          <button class="mui-btn mui-btn--primary" v-on:click="setSecret(pendingSecret)">Set Secret</button>
+          <button class="mui-btn mui-btn--primary" v-on:click="randomizeSecret()">Random</button>
+        </div>
       </div>
-      <div>
-        <button class="mui-btn mui-btn--primary" v-on:click="setSecret(pendingSecret)">Set Secret</button>
-        <button class="mui-btn mui-btn--primary" v-on:click="setSecret(secret)">Reset</button>
-        <button class="mui-btn mui-btn--primary" v-on:click="randomizeSecret()">Random</button>
+      <div v-else>
+        <div v-if="showSecretContent" class="edit-card-content">
+          <div class="qr-container">
+            <qr-code class="qrcode" :content="qrContent"></qr-code>
+          </div>
+          <div class="seed-input-textfield mui-textfield">
+            <input type="text" v-model="pendingSecret">
+            <label>OTP Seed Value</label>
+          </div>
+        </div>
+        <div v-else class="primary-card-content">
+          <progress-circle interval="30"></progress-circle>
+          <h1>OTP: {{ otp }}</h1>
+        </div>
+        <button class="mui-btn mui-btn--primary" v-on:click="setSecret(null)">Clear</button>
+        <button class="mui-btn mui-btn--primary" v-on:click="toggleSecretContent()">Show Secret</button>
       </div>
-      <h1>OTP: {{ otp }}</h1>
-      <small>Time Remaining: {{ time }}</small>
     </div>
   </section>
 </template>
@@ -35,6 +47,7 @@ export default {
   },
   data () {
     return {
+      showSecretContent: false,
       secret: null,
       time: null,
       otp: null,
@@ -64,6 +77,10 @@ export default {
   },
 
   methods: {
+    toggleSecretContent () {
+      this.showSecretContent = !this.showSecretContent
+    },
+
     randomizeSecret () {
       let newSecret = OTP.getRandomInt(0, Math.pow(10, 12))
       this.setSecret(newSecret)
@@ -75,15 +92,19 @@ export default {
     },
 
     setSecret (newSecret) {
-      newSecret = String(newSecret)
+      if (!newSecret) {
+        this.secret = null
+      } else {
+        newSecret = String(newSecret)
 
-      try {
-        this.generator = new OTP(newSecret)
-        this.secret = newSecret
-        this.pendingSecret = newSecret
-        this.setQRCode()
-      } catch (err) {
-        console.error(err.message)
+        try {
+          this.generator = new OTP(newSecret)
+          this.secret = newSecret
+          this.pendingSecret = newSecret
+          this.setQRCode()
+        } catch (err) {
+          console.error(err.message)
+        }
       }
     }
   }
