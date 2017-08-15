@@ -1,6 +1,7 @@
 <template>
   <section class="mui-panel otp-card">
     <h3>{{ name }}</h3>
+    <progress-circle interval="30"></progress-circle>
     <div class="qr-container">
       <qr-code class="qrcode" :content="qrContent"></qr-code>
     </div>
@@ -23,10 +24,11 @@
 <script>
 import OTP from 'tiny-otp'
 import qrCode from './qr-code.vue'
+import progressCircle from './progress-circle.vue'
 
 export default {
   name: 'otp-card',
-  components: { qrCode },
+  components: { qrCode, progressCircle },
   props: {
     name: String,
     secret: String
@@ -43,9 +45,7 @@ export default {
   },
 
   created () {
-    // Use var for these variables, since we want them in the global scope.
-    //let newSecret = OTP.getRandomInt(0, Math.pow(10, 12))
-
+    // Set the pending(displayed) secret as the provided secret
     this.pendingSecret = this.secret
 
     // Show default generated secret value in UI
