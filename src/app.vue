@@ -13,7 +13,10 @@
 
     <div class="otp-card-list">
       <div class="otp-card-container" v-for="(otp, index) in otps" :key="index">
-        <otp-card :name="otp.name" :secret="otp.secret"></otp-card>
+        <otp-card :name="otp.name" :secret="String(otp.secret)"></otp-card>
+      </div>
+      <div class="otp-card-container">
+        <otp-create-card @newOTP="createOtpCard">></otp-create-card>
       </div>
     </div>
   </div>
@@ -23,10 +26,11 @@
 import AES from 'crypto-js/aes'
 import utf8 from 'crypto-js/enc-utf8'
 import otpCard from './otp-card.vue'
+import otpCreateCard from './otp-create-card.vue'
 
 export default {
   name: 'app',
-  components: { otpCard },
+  components: { otpCard, otpCreateCard },
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
@@ -43,6 +47,16 @@ export default {
     this.encrypt('test123')
   },
   methods: {
+    // Add a new OTP card to the UI
+    createOtpCard (secret) {
+      const newOTP = {
+        name: 'New OTP',
+        secret: new String(secret)
+      }
+
+      this.otps.push(newOTP)
+    },
+
     // Encrypt stored keys with AES-256 encryption
     encrypt (encryptionKey) {
       let encrypted = AES.encrypt(JSON.stringify(this.otps), encryptionKey)
@@ -51,13 +65,6 @@ export default {
       let decryptedObj = JSON.parse(decryptedText)
       console.log(decryptedObj)
     },
-    bytesToString(bytes) {
-      let result = ''
-      for (let i = 0; i < bytes.length; i++) {
-        result += String.fromCharCode(parseInt(bytes[i], 2));
-      }
-      return result;
-    }
   }
 }
 </script>
@@ -67,8 +74,16 @@ export default {
 @import "~muicss/dist/css/mui.css";
 @import "_variables.scss";
 
+.otp-card-container {
+  flex: 1 1 20%;
+  padding: 12px;
+}
+
 .otp-card-list {
   margin: 24px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 #app {
