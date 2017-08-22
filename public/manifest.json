@@ -1,0 +1,8 @@
+{
+  "name": "OpenOTP",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "An offline-first OTP generator webapp, directly compatible with Google Authenticator.",
+  "icons": []
+}
