@@ -10,7 +10,6 @@
       <li><a target="_blank" rel="noopener" href="https://github.com/triestpa/Open-OTP">Open-OTP Project Github Repo</a></li>
       <li><a target="_blank" rel="noopener" href="https://github.com/triestpa/Tiny-OTP">Tiny-OTP Library Github Repo</a></li>
     </ul>
-
     <div class="otp-card-list">
       <div class="otp-card-container" v-for="(otp, index) in otps" :key="index">
         <otp-card :name="otp.name" :secret="String(otp.secret)"></otp-card>

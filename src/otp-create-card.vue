@@ -18,7 +18,6 @@
 <script>
 import OTP from 'tiny-otp'
 import qrCode from './qr-code.vue'
-import progressCircle from './progress-circle.vue'
 
 export default {
   name: 'otp-create-card',

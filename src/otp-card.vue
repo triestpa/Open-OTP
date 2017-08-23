@@ -7,7 +7,9 @@
           <qr-code class="qrcode" :content="qrContent"></qr-code>
         </div>
         <div class="primary-card-content">
-          <progress-circle :interval="30"></progress-circle>
+          <div class="clock-container">
+            <clock></clock>
+          </div>
           <h1>OTP: {{ otp }}</h1>
         </div>
       </div>
@@ -18,11 +20,11 @@
 <script>
 import OTP from 'tiny-otp'
 import qrCode from './qr-code.vue'
-import progressCircle from './progress-circle.vue'
+import clock from './clock.vue'
 
 export default {
   name: 'otp-card',
-  components: { qrCode, progressCircle },
+  components: { qrCode, clock },
   props: {
     name: String,
     secret: String
@@ -61,6 +63,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.clock-container {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
 
 .qr-container {
   text-align: center;
