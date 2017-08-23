@@ -1,6 +1,7 @@
 /**
  * Base config loaders to be imported in all builds
  */
+const path = require("path");
 
 const urlLoader = {
   test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,

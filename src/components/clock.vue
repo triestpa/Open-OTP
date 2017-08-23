@@ -1,10 +1,8 @@
 <template>
-  <div class="clock-container">
-    <div class="clock">
-      <div class="center-circle"></div>
-      <div class="seconds-container">
-        <div ref="secondsHand" class="seconds"></div>
-      </div>
+  <div class="clock">
+    <div class="center-circle"></div>
+    <div class="seconds-container">
+      <div ref="secondsHand" class="seconds"></div>
     </div>
   </div>
 </template>
@@ -34,9 +32,10 @@
 
 <style lang="scss" scoped>
   /* Forked from cssanimation.rocks/clocks */
+
   .clock {
     border-radius: 50%;
-    background: #EAEAEA url('./assets/clock.svg') no-repeat center;
+    background: #EAEAEA url('../assets/clock.svg') no-repeat center;
     background-size: 95%;
     height: 100%;
     position: relative;

@@ -7,9 +7,6 @@
           <qr-code class="qrcode" :content="qrContent"></qr-code>
         </div>
         <div class="primary-card-content">
-          <div class="clock-container">
-            <clock></clock>
-          </div>
           <h1>OTP: {{ otp }}</h1>
         </div>
       </div>
@@ -20,11 +17,10 @@
 <script>
 import OTP from 'tiny-otp'
 import qrCode from './qr-code.vue'
-import clock from './clock.vue'
 
 export default {
   name: 'otp-card',
-  components: { qrCode, clock },
+  components: { qrCode },
   props: {
     name: String,
     secret: String

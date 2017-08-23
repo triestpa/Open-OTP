@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "A web-based, offline-first, time-based one-time-password generator.",
   "scripts": {
-    "start": "webpack-dev-server --content-base public --config=webpack.dev.config.js",
-    "deploy": "webpack --config=webpack.prod.config.js && gsutil rsync -d -r ./public gs://otp.patricktriest.com",
+    "start": "webpack-dev-server --content-base public --config=./build/webpack.dev.config.js",
+    "deploy": "webpack --config=./build/webpack.prod.config.js && gsutil rsync -d -r ./public gs://otp.patricktriest.com",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
