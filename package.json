@@ -1,15 +1,22 @@
 {
-  "name": "authenticator",
+  "name": "open-otp",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "A web-based, offline-first, time-based one-time-password generator.",
   "scripts": {
     "start": "webpack-dev-server --content-base public --config=webpack.dev.config.js",
     "deploy": "webpack --config=webpack.prod.config.js && gsutil rsync -d -r ./public gs://otp.patricktriest.com",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Patrick Triest",
+    "email": "patrick.triest@gmail.com",
+    "url": "https://blog.patricktriest.com"
+  },
+  "license": "MIT",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/triestpa/Open-OTP.git"
+  },
   "dependencies": {
     "crypto-js": "3.1.9-1",
     "muicss": "0.9.20",
@@ -29,6 +36,7 @@
     "css-loader": "0.28.4",
     "node-sass": "4.5.3",
     "sass-loader": "6.0.6",
+    "url-loader": "0.5.9",
     "vue-loader": "13.0.4",
     "vue-template-compiler": "2.4.2",
     "webpack": "3.4.1",
