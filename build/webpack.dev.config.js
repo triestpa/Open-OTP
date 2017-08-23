@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
+const baseConfig = require("./webpack.base")
 
 module.exports = {
   entry: "./src/main.js",
@@ -17,14 +18,8 @@ module.exports = {
           }
         }
       },
-      {
-        loader: "babel-loader",
-        include: [path.resolve(__dirname, "src")],
-        test: /\.js$/,
-        query: {
-          presets: ['es2017']
-        }
-      }
+      baseConfig.urlLoader,
+      baseConfig.babelLoader
     ]
   },
   plugins: []
